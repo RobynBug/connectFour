@@ -5,6 +5,7 @@ class Game {
     this.height = height;
     this.width = width;
     this.board = [];
+    this.active = true;
     this.playerOne = playerOne;
     this.playerTwo = playerTwo;
     this.currPlayer = 1;
@@ -22,7 +23,6 @@ class Game {
   makeHtmlBoard() {
     const board = document.getElementById("board");
     const gameItems = document.querySelector(".game_functions");
-
     //Insert start game buttons
     const startButton = document.createElement("button");
     startButton.setAttribute("type", "button");
@@ -68,21 +68,25 @@ class Game {
   }
 
   placeInTable(y, x) {
+    
     const currPlayer = this.currPlayer;
     const piece = document.createElement("div");
     piece.classList.add("piece");
     piece.classList.add(`p${currPlayer}`);
     piece.style.top = -50 * (y + 2);
     const spot = document.getElementById(`${y}-${x}`);
+    if(this.active){
     if (this.currPlayer === 1) {
       piece.style.backgroundColor = this.playerOne.color;
     } else {
       piece.style.backgroundColor = this.playerTwo.color;
     }
+  }
     spot.append(piece);
   }
 
   endGame(msg) {
+    this.active = false;
     alert(msg);
   }
 
@@ -93,6 +97,7 @@ class Game {
       playerList.forEach((item) => {
         const newTextBox = document.createElement("input");
         newTextBox.setAttribute("type", "text");
+        newTextBox.setAttribute("readonly", true);
         newTextBox.value = item.name;
         gameItems.appendChild(newTextBox);
       });
@@ -106,12 +111,14 @@ class Game {
     gameItems.innerHTML = "";
     this.board = [];
     this.currPlayer = 1;
+    this.active = true;
     this.makeBoard();
     this.makeHtmlBoard();
   }
 
   handleClick(evt) {
     // get x from ID of clicked cell
+    if(this.active = true){
     const x = +evt.target.id;
 
     // get next spot in column (if none, ignore click)
@@ -121,12 +128,21 @@ class Game {
     }
 
     // place piece in board and add to HTML table
+    if(this.active){
     this.board[y][x] = this.currPlayer;
     this.placeInTable(y, x);
-
+    }
     // check for win
     if (this.checkForWin()) {
-      return endGame(`Player ${currPlayer} won!`);
+      this.active = false;
+      if(this.currPlayer === 1){
+        console.log(this.active)
+      return this.endGame(`${this.playerOne.name} won!`);
+      } else if(this.currPlayer === 2){
+        return this.endGame(`${this.playerTwo.name} won!`);
+      }else {
+        return this.endGame(`Player ${this.currPlayer} won!`);
+      }
     }
 
     // check for tie
@@ -137,6 +153,7 @@ class Game {
     // switch players
     this.currPlayer = this.currPlayer === 1 ? 2 : 1;
   }
+}
 
   checkForWin() {
     const _win = (cells) => {
@@ -185,6 +202,7 @@ class Game {
 
         // find winner (only checking each win-possibility as needed)
         if (_win(horiz) || _win(vert) || _win(diagDR) || _win(diagDL)) {
+          this.active = false;
           return true;
         }
       }
